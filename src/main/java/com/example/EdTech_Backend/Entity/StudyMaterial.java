@@ -18,7 +18,7 @@ public class StudyMaterial {
     private Long size;
 
     @ManyToOne
-    @JoinColumn(name="schoolclass_id")
+    @JoinColumn(name="class_id")
     private SchoolClass schoolClass;
 
 

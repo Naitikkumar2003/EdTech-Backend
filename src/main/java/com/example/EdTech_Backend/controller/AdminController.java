@@ -97,7 +97,7 @@ public class AdminController {
 
 
    // it add the subject
-    @PostMapping("/subject")
+    @PostMapping("/addsubject")
     public ResponseEntity<?> addsubject(@RequestParam Long classId,@RequestBody Subject subject){
 
         SchoolClass schoolClass=schoolClassRepository.findById(classId)
@@ -155,6 +155,8 @@ public class AdminController {
     public ResponseEntity<?> getAllStudents(){
         return ResponseEntity.ok(studentService.getAllStudents());
     }
+
+
     @DeleteMapping("/student/{id}")
     public ResponseEntity<?>  deleteStudent(@PathVariable  Long id){
         studentService.deleterStudent(id);
@@ -167,23 +169,30 @@ public class AdminController {
         List<AdminResponse> admins=customUserDetailsService.getAllAdmina();
         return ResponseEntity.ok(admins);
     }
-    @DeleteMapping("/admin/delete")
-    public  ResponseEntity<?> deleteAdmin(@PathVariable Long id, Authentication authentication){
+    @DeleteMapping("/admin/delete/{id}")
+    public  ResponseEntity<?> deleteAdmin(@PathVariable Long id){
 
-        User admin=userRepository.findById(id)
-                .orElseThrow(()->new RuntimeException("Admin not found"));
-        if(admin.getRole()!=Role.ADMIN){
-            return ResponseEntity.badRequest().body("User is not a Admin");
-        }
-        String curremail=authentication.getName();
-        if(admin.getEmail().equals(curremail)){
-            return ResponseEntity.badRequest().body("You Cannot delete yourself");
-        }
-        if(userRepository.CountByRole(Role.ADMIN)<=1){
-            return ResponseEntity.badRequest().body("At least one admin is require for application");
-        }
-        userRepository.delete(admin);
-        return ResponseEntity.ok("Admin is deleted succesfully");
+        String respose= customUserDetailsService.deleteAdmin(id);
+        return ResponseEntity.ok(respose);
+    }
+    @GetMapping("/student/search")
+    public ResponseEntity<?> searchtudents(@RequestParam String name){
+        return ResponseEntity.ok(customUserDetailsService.searchStudent(name));
+    }
+    @GetMapping("/getsubjects")
+    public ResponseEntity<?> searchsubjectbyclass(@RequestParam Long classId){
+
+        SchoolClass schoolClass= schoolClassRepository.findById(classId)
+                .orElseThrow(()-> new RuntimeException("Class not found"));
+
+        List<Subject> subjects=subjectRepository.findBySchoolClass(schoolClass);
+
+        return ResponseEntity.ok(subjects);
+    }
+
+    @DeleteMapping("/deletematerial/{id}")
+    public ResponseEntity<?> deletematerial(@PathVariable("id") Long id){
+        return ResponseEntity.ok(customUserDetailsService.deleteMaterial(id));
     }
 
 }

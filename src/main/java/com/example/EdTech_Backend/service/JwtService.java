@@ -6,10 +6,16 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 @Component
 public class JwtService {
-    private final String SECRET ="your-secret-api";
+    private final String SECRET ="mySuperSecureJwtSecretKeyForEdTechPlatform2026";
+
+    private SecretKey getSignKey() {
+        return Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
+    }
 
     public String generatetoken(UserDetails userDetails){
         return Jwts.builder() //Starts building a JWT token
@@ -21,7 +27,9 @@ public class JwtService {
                 .compact(); //Converts everything into a compact string
     }
 
-    public String extractusername(String token) {
+
+
+    public String extractUsername(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(Keys.hmacShaKeyFor(SECRET.getBytes()))
                 .build()

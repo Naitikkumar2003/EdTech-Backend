@@ -1,4 +1,4 @@
-package com.example.EdTech_Backend.service;
+package com.example.EdTech_Backend.DTO;
 
 public class JwtResponse {
 

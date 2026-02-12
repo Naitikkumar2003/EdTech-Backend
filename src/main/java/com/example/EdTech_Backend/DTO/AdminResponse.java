@@ -5,17 +5,14 @@ import com.example.EdTech_Backend.Entity.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @AllArgsConstructor
 public class AdminResponse {
     private Long id;
     private String email;
-    private String name;
-    private Role role;
+    private String role;
+    private LocalDateTime created_at;
 
-    public AdminResponse(Long id, String email, String name) {
-        this.id=id;
-        this.email=email;
-        this.name=name;
-    }
 }

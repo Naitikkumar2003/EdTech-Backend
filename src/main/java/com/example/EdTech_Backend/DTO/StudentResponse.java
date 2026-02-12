@@ -1,11 +1,15 @@
 package com.example.EdTech_Backend.DTO;
 
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
+@AllArgsConstructor
 public class StudentResponse {
 
     private Long id;
@@ -13,13 +17,8 @@ public class StudentResponse {
     private String email;
     private String className;
     private String schoolName;
+    private LocalDateTime localDateTime;
 
 
-    public StudentResponse(long id, String fullName, String email, String className, String schoolName) {
-        this.id=id;
-        this.fullname=fullName;
-        this.className=className;
-        this.schoolName=schoolName;
-        this.email=email;
-    }
+
 }

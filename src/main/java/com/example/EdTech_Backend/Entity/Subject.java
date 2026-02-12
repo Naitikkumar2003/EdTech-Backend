@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Setter
@@ -13,6 +15,7 @@ public class Subject {
     private Long id;
 //
     private String name;
+
 
     @ManyToOne
     @JoinColumn(name = "class_id")

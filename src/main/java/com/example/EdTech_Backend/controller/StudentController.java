@@ -6,6 +6,8 @@ import com.example.EdTech_Backend.Entity.User;
 import com.example.EdTech_Backend.Repository.StudentRepository;
 import com.example.EdTech_Backend.Repository.StudyMaterialRepository;
 import com.example.EdTech_Backend.Repository.UserRepository;
+import com.example.EdTech_Backend.service.StudentService;
+import lombok.AllArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -13,10 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,18 +24,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/student")
+@AllArgsConstructor
 public class StudentController {
 
     private final StudyMaterialRepository studyMaterialRepository;
     private final StudentRepository studentRepository;
     private final UserRepository userRepository;
-
-    public StudentController(StudyMaterialRepository studyMaterialRepository, StudentRepository studentRepository, UserRepository userRepository) {
-        this.studyMaterialRepository = studyMaterialRepository;
-        this.studentRepository = studentRepository;
-        this.userRepository = userRepository;
-    }
-
+    private final StudentService studentService;
 
     @GetMapping("/test")
     public String studentTest() {
@@ -53,7 +47,7 @@ public class StudentController {
     //download material by id
    // @GetMapping("/download/{materialid}")
 
-    @GetMapping("/materials")
+    /*@GetMapping("/materialss")
     public ResponseEntity<?> getMaterial(){
         Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
         String email= authentication.getName();
@@ -66,7 +60,7 @@ public class StudentController {
         String school_class=student.getClassName();
         List<StudyMaterial> materials=studyMaterialRepository.findBySchoolClass_Name(school_class);
         return ResponseEntity.ok(materials);
-    }
+    }*/
 
     @GetMapping("/download/{id}")
     private ResponseEntity<?> downloadmaterial(@PathVariable Long id)throws Exception{
@@ -87,6 +81,19 @@ public class StudentController {
                 .body(resource);
 
     }
+    @GetMapping("/materials")
+    public ResponseEntity<?> getMaterials() {
+        return ResponseEntity.ok(studentService.getMaterialsForLoggedStudent());
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<?> getProfile() {
+        return ResponseEntity.ok(studentService.getLoggedStudentDetails());
+    }
+
+
+
+
 
 
 

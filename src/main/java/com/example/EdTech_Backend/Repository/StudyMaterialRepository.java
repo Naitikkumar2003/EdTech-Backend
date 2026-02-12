@@ -10,5 +10,10 @@ import java.util.List;
 
 public interface StudyMaterialRepository extends JpaRepository<StudyMaterial,Long> {
     List<StudyMaterial> findBySchoolClass_Name(String name);
+    List<StudyMaterial> findBySchoolClass_Id(Long classId);
+
+    List<StudyMaterial> findBySubject_Id(Long subjectId);
+
+    List<StudyMaterial> findBySchoolClass_IdAndSubject_Id(Long classId, Long subjectId);
 
 }

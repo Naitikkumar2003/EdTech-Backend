@@ -8,5 +8,8 @@ import java.util.List;
 
 public interface SubjectRepository extends JpaRepository<Subject,Long> {
     List<Subject> findBySchoolClass(SchoolClass schoolClass);
+    List<Subject> findBySchoolClass_Id(Long classId);
+
+
 
 }

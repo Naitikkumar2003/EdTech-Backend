@@ -20,4 +20,14 @@ public class Student {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Column(name = "father_name")
+    private String fatherName;
+
+    @Column(name = "father_phone")
+    private String fatherPhone;
+
+    @Column(name = "home_address", columnDefinition = "TEXT")
+    private String homeAddress;
+
+
 }

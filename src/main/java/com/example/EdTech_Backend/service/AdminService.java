@@ -3,31 +3,41 @@ package com.example.EdTech_Backend.service;
 import com.example.EdTech_Backend.DTO.AdminResponse;
 import com.example.EdTech_Backend.DTO.CreateStudentRequest;
 import com.example.EdTech_Backend.DTO.RegisterRequest;
+import com.example.EdTech_Backend.DTO.CreateQuizRequest;
 import com.example.EdTech_Backend.Entity.*;
 import com.example.EdTech_Backend.Repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
+import java.time.LocalDateTime;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.ArrayList;
+
 @Service
 @RequiredArgsConstructor
 public class AdminService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final StudentRepository studentRepository;
     private final StudyMaterialRepository studyMaterialRepository;
     private final SchoolClassRepository schoolClassRepository;
     private final SubjectRepository subjectRepository;
+    private final QuizRepository quizRepository;
+    private final OptionRepository optionRepository;
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+
 
 
 
@@ -50,8 +60,17 @@ public class AdminService {
         student.setUser(user);
         studentRepository.save(student);
 
+        // 🔥 ADD THIS LINE ONLY
+        emailService.sendUserCredentials(
+                request.getEmail(),
+                request.getPassword(),
+                "STUDENT"
+        );
+
+
         return "Student created successfully";
     }
+
 
     public String createAdmin(RegisterRequest request) {
 
@@ -64,6 +83,12 @@ public class AdminService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(Role.ADMIN);
         userRepository.save(user);
+        emailService.sendUserCredentials(
+                request.getEmail(),
+                request.getPassword(),
+                "ADMIN"
+        );
+
 
         return "Admin created successfully";
     }
@@ -173,6 +198,50 @@ public class AdminService {
 
         return studyMaterialRepository
                 .findBySchoolClass_IdAndSubject_Id(classId, subjectId);
+    }
+
+
+
+    public void createQuiz(CreateQuizRequest request) {
+
+        Quiz quiz = new Quiz();
+        quiz.setClassName(request.getClassName());
+        quiz.setQuestion(request.getQuestion());
+        quiz.setCreatedAt(LocalDateTime.now());
+
+        List<Option> optionList = new ArrayList<>();
+
+        for (int i = 0; i < request.getOptions().size(); i++) {
+
+            Option option = new Option();
+            option.setText(request.getOptions().get(i));
+            option.setQuiz(quiz);
+
+            optionList.add(option);
+
+            if (i == request.getCorrectIndex()) {
+                // We will set after saving
+            }
+        }
+
+        quiz.setOptions(optionList);
+
+        quiz = quizRepository.save(quiz);
+
+        // Now set correctOptionId
+        Option correctOption = quiz.getOptions().get(request.getCorrectIndex());
+        quiz.setCorrectOptionId(correctOption.getId());
+
+        quizRepository.save(quiz);
+    }
+
+
+    public List<Quiz> getAllQuizzes() {
+        return quizRepository.findAll();
+    }
+
+    public void deleteQuiz(Long id) {
+        quizRepository.deleteById(id);
     }
 
 

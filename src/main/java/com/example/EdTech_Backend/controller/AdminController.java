@@ -1,6 +1,7 @@
 package com.example.EdTech_Backend.controller;
 
 import com.example.EdTech_Backend.DTO.AdminResponse;
+import com.example.EdTech_Backend.DTO.CreateQuizRequest;
 import com.example.EdTech_Backend.DTO.CreateStudentRequest;
 import com.example.EdTech_Backend.Entity.*;
 import com.example.EdTech_Backend.Repository.*;
@@ -141,6 +142,22 @@ public class AdminController {
         return ResponseEntity.ok(
                 adminService.getMaterialsByClassAndSubject(classId, subjectId)
         );
+    }
+    @PostMapping("/quiz")
+    public ResponseEntity<?> createQuiz(@RequestBody CreateQuizRequest request) {
+        adminService.createQuiz(request);
+        return ResponseEntity.ok("Quiz Created Successfully");
+    }
+
+    @GetMapping("/quizzes")
+    public ResponseEntity<List<Quiz>> getAllQuizzes() {
+        return ResponseEntity.ok(adminService.getAllQuizzes());
+    }
+
+    @DeleteMapping("/quiz/{id}")
+    public ResponseEntity<?> deleteQuiz(@PathVariable Long id) {
+        adminService.deleteQuiz(id);
+        return ResponseEntity.ok("Deleted Successfully");
     }
 
 

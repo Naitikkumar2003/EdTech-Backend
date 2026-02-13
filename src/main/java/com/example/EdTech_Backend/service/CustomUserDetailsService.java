@@ -6,11 +6,14 @@ import com.example.EdTech_Backend.Entity.User;
 
 import com.example.EdTech_Backend.Repository.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -22,6 +25,9 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
+
+
 
 
 
@@ -43,35 +49,53 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .build();
     }
 
-    public String forgotPassword(String email) {
+
+
+    public void forgotPassword(String email) {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        String token = UUID.randomUUID().toString();
+        // 🔥 Generate 6 digit OTP
+        String otp = String.valueOf((int)(Math.random() * 900000) + 100000);
 
-        user.setResetToken(token);
-        user.setResetTokenExpiry(LocalDateTime.now().plusMinutes(15));
+        user.setResetOtp(otp);
+        user.setResetOtpExpiry(LocalDateTime.now().plusMinutes(10));
+
 
         userRepository.save(user);
-        return "Reset link generated. Token: " + token;
+
+        emailService.sendOtpEmail(user.getEmail(), otp);
     }
-    public String resetPassword(String token,String resetPassword) {
 
-        User user = userRepository.findByResetToken(token)
-                .orElseThrow(() -> new RuntimeException("Invalid token"));
+    public void resetPasswordWithOtp(String email, String otp, String newPassword) {
 
-        if (user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Token expired");
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+
+
+        if (user.getResetOtp() == null || !user.getResetOtp().equals(otp)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid OTP");
+
         }
 
-        user.setPassword(passwordEncoder.encode(resetPassword));
-        user.setResetToken(null);
-        user.setResetTokenExpiry(null);
+        if (user.getResetOtpExpiry().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("OTP expired");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+
+
+
+        // Clear OTP
+        user.setResetOtp(null);
+        user.setResetOtpExpiry(null);
 
         userRepository.save(user);
-
-        return "Password reset successful";
     }
+
+
+
 
 }

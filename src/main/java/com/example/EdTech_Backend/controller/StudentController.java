@@ -1,11 +1,14 @@
 package com.example.EdTech_Backend.controller;
 
+import com.example.EdTech_Backend.DTO.UpdateStudentRequest;
 import com.example.EdTech_Backend.Entity.Student;
 import com.example.EdTech_Backend.Entity.StudyMaterial;
 import com.example.EdTech_Backend.Entity.User;
+import com.example.EdTech_Backend.Repository.QuizRepository;
 import com.example.EdTech_Backend.Repository.StudentRepository;
 import com.example.EdTech_Backend.Repository.StudyMaterialRepository;
 import com.example.EdTech_Backend.Repository.UserRepository;
+import com.example.EdTech_Backend.service.MaterialService;
 import com.example.EdTech_Backend.service.StudentService;
 import lombok.AllArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
@@ -27,10 +30,9 @@ import java.util.List;
 @AllArgsConstructor
 public class StudentController {
 
-    private final StudyMaterialRepository studyMaterialRepository;
-    private final StudentRepository studentRepository;
-    private final UserRepository userRepository;
     private final StudentService studentService;
+    private final QuizRepository quizRepository;
+    private final MaterialService materialService;
 
     @GetMapping("/test")
     public String studentTest() {
@@ -42,45 +44,7 @@ public class StudentController {
 
 
     // get material by subjectcode
-    //@GetMapping("/subject/{subjectid}/materials")
 
-    //download material by id
-   // @GetMapping("/download/{materialid}")
-
-    /*@GetMapping("/materialss")
-    public ResponseEntity<?> getMaterial(){
-        Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
-        String email= authentication.getName();
-        User user=userRepository.findByEmail(email)
-                .orElseThrow(()-> new RuntimeException("USer not Found"));
-
-        Student student=studentRepository.findByUser(user)
-                .orElseThrow(() -> new RuntimeException("Student not found"));
-
-        String school_class=student.getClassName();
-        List<StudyMaterial> materials=studyMaterialRepository.findBySchoolClass_Name(school_class);
-        return ResponseEntity.ok(materials);
-    }*/
-
-    @GetMapping("/download/{id}")
-    private ResponseEntity<?> downloadmaterial(@PathVariable Long id)throws Exception{
-        StudyMaterial studyMaterial=studyMaterialRepository.findById(id)
-                .orElseThrow(()-> new RuntimeException("Material not available"));
-
-        File file =new File(studyMaterial.getFilePath());
-        if(!file.exists()) {
-            throw  new RuntimeException("file not found");
-        }
-        InputStreamResource resource=new InputStreamResource(new FileInputStream(file));
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION,"attachment :filename="
-                        +studyMaterial.getFilename())
-                .contentLength(file.length())
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(resource);
-
-    }
     @GetMapping("/materials")
     public ResponseEntity<?> getMaterials() {
         return ResponseEntity.ok(studentService.getMaterialsForLoggedStudent());
@@ -88,7 +52,40 @@ public class StudentController {
 
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile() {
+
         return ResponseEntity.ok(studentService.getLoggedStudentDetails());
+    }
+
+    @GetMapping("/quizzes")
+    public ResponseEntity<?> getStudentQuizzes(Authentication authentication) {
+
+        String email = authentication.getName();
+        return ResponseEntity.ok(studentService.getStudentQuizzes(email));
+    }
+
+    @GetMapping("/quiz/{id}")
+    public ResponseEntity<?> getSingleQuiz(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        return ResponseEntity.ok(quizRepository.findById(id));
+    }
+    @PostMapping("/student/profile-update")
+    public ResponseEntity<String> updateProfile(
+            @RequestBody UpdateStudentRequest request,
+            Authentication authentication) {
+
+        String email = authentication.getName();
+
+        studentService.updateProfile(email, request);
+
+        return ResponseEntity.ok("Profile updated successfully");
+    }
+
+    @GetMapping("/download/{id}")
+    private ResponseEntity<?> downloadmaterial(@PathVariable Long id)throws Exception{
+        return ResponseEntity.ok(materialService.downloadMaterial(id));
+
     }
 
 

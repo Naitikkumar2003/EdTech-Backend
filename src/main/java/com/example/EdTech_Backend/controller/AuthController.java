@@ -17,6 +17,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/auth")
 @AllArgsConstructor
@@ -57,16 +59,26 @@ public class AuthController {
         return ResponseEntity.ok("Registered Succedfully");
 
     }
+
+
     @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestParam String email) {
-        return ResponseEntity.ok(customUserDetailsService.forgotPassword(email));
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
+
+        customUserDetailsService.forgotPassword(request.get("email"));
+        return ResponseEntity.ok("OTP sent to email");
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(
-            @RequestParam String token,
-            @RequestParam String newPassword) {
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
 
-        return ResponseEntity.ok(customUserDetailsService.resetPassword(token, newPassword));
+        customUserDetailsService.resetPasswordWithOtp(
+                request.get("email"),
+                request.get("otp"),
+                request.get("newPassword")
+        );
+
+        return ResponseEntity.ok("Password reset successful");
     }
+
+
 }

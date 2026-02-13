@@ -38,8 +38,12 @@ public class User {
         createdAt = LocalDateTime.now();
     }
 
-    private String resetToken;
-    private LocalDateTime resetTokenExpiry;
+
+    @Column(name = "reset_otp")
+    private String resetOtp;
+
+    @Column(name = "reset_otp_expiry")
+    private LocalDateTime resetOtpExpiry;
 
 
 }

@@ -1,17 +1,10 @@
 package com.example.EdTech_Backend.service;
 
 
-import com.example.EdTech_Backend.DTO.ResetPasswordRequest;
 import com.example.EdTech_Backend.DTO.StudentResponse;
 import com.example.EdTech_Backend.DTO.UpdateStudentRequest;
-import com.example.EdTech_Backend.Entity.Student;
-import com.example.EdTech_Backend.Entity.StudyMaterial;
-import com.example.EdTech_Backend.Entity.Subject;
-import com.example.EdTech_Backend.Entity.User;
-import com.example.EdTech_Backend.Repository.StudentRepository;
-import com.example.EdTech_Backend.Repository.StudyMaterialRepository;
-import com.example.EdTech_Backend.Repository.SubjectRepository;
-import com.example.EdTech_Backend.Repository.UserRepository;
+import com.example.EdTech_Backend.Entity.*;
+import com.example.EdTech_Backend.Repository.*;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,6 +24,7 @@ public class StudentService {
     private final UserRepository userRepository;
     private final SubjectRepository subjectRepository;
     private final StudyMaterialRepository studyMaterialRepository;
+    private final QuizRepository quizRepository;
 
 
     public List<StudentResponse> getAllStudents(){
@@ -84,6 +78,26 @@ public class StudentService {
         return studentRepository.findByUser(user)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
     }
+    public List<Quiz> getStudentQuizzes(String email) {
+
+        Student student = studentRepository.findByUser_Email(email)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        return quizRepository.findByClassName(student.getClassName());
+    }
+    public void updateProfile(String email, UpdateStudentRequest request) {
+
+        Student student = studentRepository.findByUser_Email(email)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        student.setFatherName(request.getFatherName());
+        student.setFatherPhone(request.getFatherPhone());
+        student.setHomeAddress(request.getHomeAddress());
+
+        studentRepository.save(student);
+    }
+
+
 
 
 
